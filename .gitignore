@@ -1,0 +1,7 @@
+__pycache__/
+*.pyc
+TEXT FILES/report_cards/
+TEXT FILES/*.pdf
+TEXT FILES/*.png
+TEXT FILES/*.txt
+.venv/
