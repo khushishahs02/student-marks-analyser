@@ -78,12 +78,11 @@ This makes the system useful for:
 ---
 
 ## 📂 Project Structure
-
+```bash
 STUDENT_MARKS_ANALYSER/
 │
-├── CODE/
-│   └── main.py
-│
+├── main.py
+│ 
 ├── TEXT FILES/
 │   └── (generated outputs)
 │
@@ -91,12 +90,13 @@ STUDENT_MARKS_ANALYSER/
 │   ├── grade_distribution.png
 │   ├── heatmap.png
 │   ├── topper_vs_average.png
-│   └── report_card_sample.png
-│
+│   ├── report_card_average.png
+│   ├── report_card_topper.png
+│   └── report_card_fail.png
 ├── requirements.txt
 ├── README.md
 └── .gitignore
-
+```
 ## 🖼 Sample Outputs
 
 ### 📈 Grade Distribution
@@ -115,7 +115,7 @@ STUDENT_MARKS_ANALYSER/
 ---
 
 ### 📄 Sample Report Card
-![Report Card](screenshots/report_card_sample.png)
+![Report Card](screenshots/report_card_average.png)
 
 ---
 
@@ -124,19 +124,21 @@ STUDENT_MARKS_ANALYSER/
 ### 1️⃣ Clone the Repository
 
 ```bash
-git clone https://github.com/yourusername/student-marks-analyser.git '''
-
+git clone https://github.com/khushishahs02/student-marks-analyser.git 
+```
 
 ### 2️⃣ Install Dependencies
-
+```bash
 pip install -r requirements.txt
-
+```
 ### 3️⃣ Navigate to the Project Folder
-cd STUDENT_MARKS_ANALYSER/CODE
-
+```bash
+cd STUDENT_MARKS_ANALYSER/
+```
 ### 4️⃣ Run the Program
+```bash
 python main.py
-
+```
 ---
 
 ## 👩‍💻 Author
