@@ -5,3 +5,4 @@ TEXT FILES/*.pdf
 TEXT FILES/*.png
 TEXT FILES/*.txt
 .venv/
+tempCodeRunnerFile.py
