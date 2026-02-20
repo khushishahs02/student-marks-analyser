@@ -134,15 +134,15 @@ This allows users to understand:
 ```bash
 git clone https://github.com/khushishahs02/student-marks-analyser.git 
 ```
-
-### 2️⃣ Install Dependencies
+### 2️⃣Navigate to the Project Folder
+```bash
+cd student-marks-analyser
+```
+### 3️⃣ Install Dependencies
 ```bash
 pip install -r requirements.txt
 ```
-### 3️⃣ Navigate to the Project Folder
-```bash
-cd STUDENT_MARKS_ANALYSER/
-```
+
 ### 4️⃣ Run the Program
 ```bash
 python main.py
