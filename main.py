@@ -1,18 +1,12 @@
 import os
 import matplotlib.pyplot as plt
-from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Image, Table, TableStyle
-from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
-from reportlab.lib.units import inch
-from reportlab.lib import colors
-from reportlab.lib.pagesizes import A4
 import seaborn as sns
-import pandas as pd
-
+from fpdf import FPDF
 
 
 #get the name of directory in which we are working and change that directory to the desired one
 base_dir = os.path.dirname(os.path.abspath(__file__))
-data_dir = os.path.join(base_dir,"..","TEXT FILES")
+data_dir = os.path.join(base_dir,"TEXT FILES")
 
 input_file = os.path.join(data_dir,"students_data.txt")
 result_path = os.path.join(data_dir, "result.txt")
@@ -247,37 +241,27 @@ def bar_chart(students) :
     plt.ylabel("Number of Students")
     plt.savefig(bar_path)
     plt.close()
-#-------------------HeatMap-------------------------
-def heatmap(input_file):
-
-    df = pd.read_csv(input_file, header=None)
-
-    marks_df = df.iloc[:, 2:]
-    marks_df.columns = subject_names[:len(marks_df.columns)]
-
-    plt.figure(figsize=(10,10))
-    sns.heatmap(marks_df, cmap="coolwarm")
-
-    plt.title("Class Performance Heatmap")
-    plt.xlabel("Subjects")
-    plt.ylabel("Students")
-
-    heatmap_path = os.path.join(data_dir, "heatmap.png")
-    plt.savefig(heatmap_path)
-    plt.close()
-    return heatmap_path
-#-----------------TOPPER VS AVERAGE-------------
 def topper_vs_average_graph(input_file):
 
-    df = pd.read_csv(input_file, header=None)
+    marks_matrix = []
 
-    marks_df = df.iloc[:, 2:]
-    marks_df.columns = subject_names
+    with open(input_file, "r") as f:
+        for line in f:
+            parts = line.strip().split(",")
+            marks = list(map(int, parts[2:]))
+            marks_matrix.append(marks)
 
-    subject_avg = marks_df.mean()
-    subject_topper = marks_df.max()
+    # Transpose matrix to get subject-wise marks
+    subject_wise = list(zip(*marks_matrix))
 
-    plt.figure(figsize=(12,10))
+    subject_avg = []
+    subject_topper = []
+
+    for subject_marks in subject_wise:
+        subject_avg.append(sum(subject_marks) / len(subject_marks))
+        subject_topper.append(max(subject_marks))
+
+    plt.figure(figsize=(10,6))
 
     plt.plot(subject_names, subject_avg, marker='o', label="Class Average")
     plt.plot(subject_names, subject_topper, marker='o', label="Topper Marks")
@@ -289,135 +273,131 @@ def topper_vs_average_graph(input_file):
 
     plt.savefig(comparison_path)
     plt.close()
-    gap = subject_topper - subject_avg
-    return subject_avg, subject_topper, gap
 
+    gap = [t - a for t, a in zip(subject_topper, subject_avg)]
+
+    return subject_avg, subject_topper, gap
 #------------REPORT - TOPPER VS AVERAGE--------------
 def topper_vs_average_report(input_file):
 
     subject_avg, subject_topper, gap = topper_vs_average_graph(input_file)
 
-    graph_path = os.path.join(data_dir, "topper_vs_average.png")
     pdf_path = os.path.join(data_dir, "topper_vs_average_report.pdf")
 
-    doc = SimpleDocTemplate(pdf_path)
-    elements = []
-    styles = getSampleStyleSheet()
+    pdf = FPDF()
+    pdf.add_page()
 
-    elements.append(Paragraph("TOPPER VS CLASS AVERAGE ANALYSIS REPORT", styles['Title']))
-    elements.append(Spacer(1, 0.3 * inch))
+    pdf.set_font("Arial", "B", 16)
+    pdf.cell(0, 10, "TOPPER VS CLASS AVERAGE ANALYSIS REPORT", ln=True, align="C")
+    pdf.ln(10)
 
-    # Attach graph
-    elements.append(Image(graph_path, width=400, height=250))
-    elements.append(Spacer(1, 0.4 * inch))
+    # Add graph image
+    pdf.image(comparison_path, w=180)
+    pdf.ln(10)
 
-    elements.append(Paragraph("SUBJECT-WISE COMPETITION GAP:", styles['Heading2']))
-    elements.append(Spacer(1, 0.2 * inch))
+    pdf.set_font("Arial", size=12)
 
-    # Add subject analysis
-    max_gap_subject = gap.idxmax()
-    min_gap_subject = gap.idxmin()
+    max_gap_index = gap.index(max(gap))
+    min_gap_index = gap.index(min(gap))
 
-    for subject in subject_names:
-        elements.append(Paragraph(
-            f"{subject}: Average = {round(subject_avg[subject],2)}, "
-            f"Topper = {subject_topper[subject]}, "
-            f"Gap = {round(gap[subject],2)}",
-            styles['Normal']
-        ))
-        elements.append(Spacer(1, 0.15 * inch))
+    for i in range(len(subject_names)):
+        pdf.multi_cell(
+            0,
+            8,
+            f"{subject_names[i]}: "
+            f"Average = {subject_avg[i]:.2f}, "
+            f"Topper = {subject_topper[i]}, "
+            f"Gap = {gap[i]:.2f}"
+        )
+        pdf.ln(2)
 
-    elements.append(Spacer(1, 0.3 * inch))
+    pdf.ln(5)
+    pdf.set_font("Arial", "B", 12)
+    pdf.cell(0, 8, "Key Insights:", ln=True)
 
-    # Key Insights
-    elements.append(Paragraph("KEY INSIGHTS:", styles['Heading2']))
-    elements.append(Spacer(1, 0.2 * inch))
+    pdf.set_font("Arial", size=12)
+    pdf.multi_cell(0, 8, f"Highest Competition Gap: {subject_names[max_gap_index]}")
+    pdf.multi_cell(0, 8, f"Most Balanced Subject: {subject_names[min_gap_index]}")
+    pdf.multi_cell(0, 8, "Larger gap indicates stronger performance disparity.")
 
-    elements.append(Paragraph(
-        f"• Highest Competition Gap observed in {max_gap_subject}.",
-        styles['Normal']
-    ))
+    pdf.output(pdf_path)
+#----------------HEATMAP---------------------
+def heatmap(input_file):
 
-    elements.append(Paragraph(
-        f"• Most Balanced Subject is {min_gap_subject} (smallest gap).",
-        styles['Normal']
-    ))
+    marks_matrix = []
 
-    elements.append(Paragraph(
-        "• Larger gap indicates strong competition difference between top performers and average students.",
-        styles['Normal']
-    ))
+    with open(input_file, "r") as f:
+        for line in f:
+            parts = line.strip().split(",")
+            marks = list(map(int, parts[2:]))
+            marks_matrix.append(marks)
 
-    doc.build(elements)
+    plt.figure(figsize=(8,6))
+    sns.heatmap(
+        marks_matrix,
+        annot=True,
+        fmt="d",
+        cmap="coolwarm",
+        xticklabels=subject_names,
+        yticklabels=[i+1 for i in range(len(marks_matrix))]
+    )
+
+    heatmap_path = os.path.join(data_dir, "heatmap.png")
+    plt.tight_layout()
+    plt.savefig(heatmap_path)
+    plt.close()
 #-----------------HeatMap report--------------
 def heatmap_report(input_file):
 
+    marks_matrix = []
 
-    df = pd.read_csv(input_file, header=None)
-    marks_df = df.iloc[:, 2:]
-    marks_df.columns = subject_names
+    with open(input_file, "r") as f:
+        for line in f:
+            parts = line.strip().split(",")
+            marks = list(map(int, parts[2:]))
+            marks_matrix.append(marks)
 
-    plt.figure(figsize=(8,5))
-    sns.heatmap(marks_df, cmap="coolwarm")
-    plt.title("Class Performance Heatmap")
-    plt.xlabel("Subjects")
-    plt.ylabel("Students")
+    subject_wise = list(zip(*marks_matrix))
+
+    plt.figure(figsize=(8,6))
+    sns.heatmap(
+        marks_matrix,
+        annot=True,
+        fmt="d",
+        cmap="coolwarm",
+        xticklabels=subject_names,
+        yticklabels=[i+1 for i in range(len(marks_matrix))]
+    )
 
     heatmap_path = os.path.join(data_dir, "heatmap.png")
     plt.savefig(heatmap_path)
     plt.close()
 
     pdf_path = os.path.join(data_dir, "heatmap_report.pdf")
-    doc = SimpleDocTemplate(pdf_path)
-    elements = []
+    pdf = FPDF()
+    pdf.add_page()
 
-    styles = getSampleStyleSheet()
+    pdf.set_font("Arial", "B", 16)
+    pdf.cell(0, 10, "CLASS PERFORMANCE ANALYSIS REPORT", ln=True, align="C")
+    pdf.ln(10)
 
-    elements.append(Paragraph("CLASS PERFORMANCE ANALYSIS REPORT", styles['Title']))
-    elements.append(Spacer(1, 0.3 * inch))
+    pdf.image(heatmap_path, w=180)
+    pdf.ln(10)
 
-    elements.append(Image(heatmap_path, width=400, height=250))
-    elements.append(Spacer(1, 0.4 * inch))
+    pdf.set_font("Arial", size=12)
 
-    elements.append(Paragraph("SUBJECT-WISE ANALYSIS:", styles['Heading2']))
-    elements.append(Spacer(1, 0.2 * inch))
+    for i, subject_marks in enumerate(subject_wise):
 
-    for subject in marks_df.columns:
+        avg = sum(subject_marks) / len(subject_marks)
+        highest = max(subject_marks)
+        lowest = min(subject_marks)
 
-        avg = float(marks_df[subject].mean())
-        avg = round(avg, 2)
+        pdf.multi_cell(0, 8,
+            f"{subject_names[i]} - Avg: {avg:.2f}, Highest: {highest}, Lowest: {lowest}"
+        )
+        pdf.ln(2)
 
-        highest = marks_df[subject].max()
-        lowest = marks_df[subject].min()
-
-        if avg >= 75:
-            level = "Easy"
-            observation = "Most students performed well in this subject."
-        elif avg >= 50:
-            level = "Moderate"
-            observation = "Average performance observed."
-        else:
-            level = "Difficult"
-            observation = "Students are struggling in this subject."
-
-        elements.append(Paragraph(
-            f"{subject} → Avg: {avg}, Highest: {highest}, Lowest: {lowest}",
-            styles['Normal']
-        ))
-
-        elements.append(Paragraph(
-            f"Difficulty Level: {level}",
-            styles['Normal']
-        ))
-
-        elements.append(Paragraph(
-            f"Observation: {observation}",
-            styles['Normal']
-        ))
-
-        elements.append(Spacer(1, 0.3 * inch))
-
-    doc.build(elements)
+    pdf.output(pdf_path)
 #----------------------REPORT CARDS-----------------
 def report_cards(students, subject_lists) :
 
@@ -464,74 +444,69 @@ def report_cards(students, subject_lists) :
              remark = f"Serious improvement required. Major focus needed on {weakest[0]}." 
 
             pdf_path = os.path.join(reports_dir, f"{sid}_{name}.pdf")
-            doc = SimpleDocTemplate(pdf_path,pagesize = A4)
-            elements = []
+            pdf = FPDF()
+            pdf.add_page()
 
-            styles = getSampleStyleSheet()
-             # ---------------- HEADER ----------------
-            elements.append(Paragraph("<b>ABC INSTITUTE OF TECHNOLOGY</b>", styles['Title']))
-            elements.append(Spacer(1, 0.2 * inch))
-            elements.append(Paragraph("<b>ACADEMIC REPORT CARD</b>", styles['Heading2']))
-            elements.append(Spacer(1, 0.3 * inch))
-            info_data = [
-              ["Student ID", sid],
-              ["Name", name],
-              ["Rank", rank_dic[sid]],
-              ["Total Marks", total],
-              ["Percentage", f"{percentage:.2f}%"],
-              ["Grade", grade],
-              ["Final Result", status],
-            ]
+            # Header
+            pdf.set_fill_color(30, 60, 120)   # dark blue
+            pdf.set_text_color(255, 255, 255)
+            pdf.set_font("Arial", "B", 18)
+            pdf.cell(0, 15, "ACADEMIC REPORT CARD", ln=True, align="C", fill=True)
 
-            info_table = Table(info_data, colWidths=[150, 300])
-            info_table.setStyle(TableStyle([
-             ('BACKGROUND', (0,0), (-1,-1), colors.whitesmoke),
-             ('GRID', (0,0), (-1,-1), 1, colors.grey),
-             ('FONTNAME', (0,0), (-1,-1), 'Helvetica'),
-             ('FONTSIZE', (0,0), (-1,-1), 10),
-             ('VALIGN', (0,0), (-1,-1), 'MIDDLE')
-            ]))
+            pdf.ln(10)
 
-            elements.append(info_table)
-            elements.append(Spacer(1, 0.4 * inch))
+            # Reset text color
+            pdf.set_text_color(0, 0, 0)
+            pdf.set_font("Arial", size=12)
 
-        # ---------------- SUBJECT TABLE ----------------
-            subject_data = [["Subject", "Marks"]]
+            # Student Info Box
+            pdf.set_draw_color(0, 0, 0)
+            pdf.cell(0, 8, f"Student ID: {sid}", ln=True, border=1)
+            pdf.cell(0, 8, f"Name: {name}", ln=True, border=1)
+            pdf.cell(0, 8, f"Rank: {rank_dic[sid]}", ln=True, border=1)
+            pdf.cell(0, 8, f"Total: {total}", ln=True, border=1)
+            pdf.cell(0, 8, f"Percentage: {percentage:.2f}%", ln=True, border=1)
+            pdf.cell(0, 8, f"Grade: {grade}", ln=True, border=1)
+            pdf.cell(0, 8, f"Result: {status}", ln=True, border=1)
+
+            pdf.ln(10)
+
+            # Subject Table Header
+            pdf.set_fill_color(200, 220, 255)
+            pdf.set_font("Arial", "B", 12)
+            pdf.cell(100, 10, "Subject", border=1, fill=True)
+            pdf.cell(80, 10, "Marks", border=1, fill=True)
+            pdf.ln()
+
+            pdf.set_font("Arial", size=12)
 
             for subject, marks in student_marks:
-             subject_data.append([subject, marks])
+                pdf.cell(100, 10, subject, border=1)
+                pdf.cell(80, 10, str(marks), border=1)
+                pdf.ln()
 
-            subject_table = Table(subject_data, colWidths=[250, 200])
-            subject_table.setStyle(TableStyle([
-             ('BACKGROUND', (0,0), (-1,0), colors.lightblue),
-             ('GRID', (0,0), (-1,-1), 1, colors.black),
-             ('ALIGN', (1,1), (-1,-1), 'CENTER'),
-             ('FONTNAME', (0,0), (-1,-1), 'Helvetica'),
-             ('FONTSIZE', (0,0), (-1,-1), 10),
-            ]))
+            pdf.ln(10)
 
-            elements.append(Paragraph("<b>Subject-wise Performance</b>", styles['Heading3']))
-            elements.append(Spacer(1, 0.2 * inch))
-            elements.append(subject_table)
-            elements.append(Spacer(1, 0.4 * inch))
+            # Remark Section
+            pdf.set_font("Arial", "B", 12)
+            pdf.cell(0, 8, "Teacher's Remark:", ln=True)
 
-        # ---------------- PERFORMANCE SUMMARY ----------------
-            elements.append(Paragraph("<b>Performance Summary</b>", styles['Heading3']))
-            elements.append(Spacer(1, 0.2 * inch))
+            pdf.set_font("Arial", size=12)
+            pdf.multi_cell(0, 8, remark)
 
-            elements.append(Paragraph(f"Strongest Subject: {strongest[0]}", styles['Normal']))
-            elements.append(Paragraph(f"Weakest Subject: {weakest[0]}", styles['Normal']))
-            elements.append(Spacer(1, 0.2 * inch))
-            elements.append(Paragraph(f"Teacher's Remark: {remark}", styles['Normal']))
+            pdf.ln(10)
 
-            elements.append(Spacer(1, 0.5 * inch))
-            elements.append(Paragraph("----- End of Report -----", styles['Normal']))
+            pdf.set_font("Arial", "I", 10)
+            pdf.cell(0, 8, "---- End of Report ----", align="C")
 
-            doc.build(elements)
+            pdf.output(pdf_path)
 # ------------------ MAIN ANALYSER ------------------
 def analyser(input_file):
 
     students, subject_lists = load_students(input_file)
+    if not students :
+        print("No data found")
+        return
     write_results(students)
     rank_and_passfail(students)
     top_ten(subject_lists)
