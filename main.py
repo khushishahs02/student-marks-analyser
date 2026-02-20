@@ -7,7 +7,8 @@ from fpdf import FPDF
 #get the name of directory in which we are working and change that directory to the desired one
 base_dir = os.path.dirname(os.path.abspath(__file__))
 data_dir = os.path.join(base_dir,"TEXT FILES")
-
+if not os.path.exists(data_dir):
+    os.makedirs(data_dir)
 input_file = os.path.join(data_dir,"students_data.txt")
 result_path = os.path.join(data_dir, "result.txt")
 grade_path = os.path.join(data_dir,"grades.txt")
