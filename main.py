@@ -91,9 +91,9 @@ def data_input(input_file) :
 
             existing_ids.add(sid) # add only if every constraint is met
             f.write(line + "\n")
-
 # ------------------ GRADE FUNCTION ------------------
 def get_grade(percentage):
+
     if percentage >= 85:
         return "AA"
     elif percentage >= 75:
@@ -134,9 +134,9 @@ def load_students(input_file) :
                for i in range(len(marks)) :
                 subject_lists[i].append((sid, name, marks[i]))
     return students, subject_lists
-          
 # ------------------ RESULTS and GRADES ------------------
 def write_results(students) :
+          
     with open(result_path, "w") as r, open(grade_path,"w" ) as g :
         r.write(f"{'ID':<15}{'Name':<25}{'Total':<15}{'Percentage':<15}\n")
         g.write(f"{'ID':<15}{'Name':<25}{'Grade':<15}\n")
@@ -147,9 +147,9 @@ def write_results(students) :
 
             r.write(f"{s[0]:<15}{s[1]:<25}{s[2]:<15}{s[3]:<15.2f}\n")
             g.write(f"{s[0]:<15}{s[1]:<25}{grade:<15}\n")
-
 #------------------CLASS STATISTICS-----------------------
 def statistics(students) :
+
     total_students = len(students)
     if total_students == 0:
       return
@@ -241,6 +241,7 @@ def bar_chart(students) :
     plt.ylabel("Number of Students")
     plt.savefig(bar_path)
     plt.close()
+#------------------TOPPER VS AVERAGE------------
 def topper_vs_average_graph(input_file):
 
     marks_matrix = []
@@ -331,8 +332,7 @@ def heatmap(input_file):
             parts = line.strip().split(",")
             marks = list(map(int, parts[2:]))
             marks_matrix.append(marks)
-
-    plt.figure(figsize=(8,6))
+    plt.figure(figsize=(10,6))
     sns.heatmap(
         marks_matrix,
         annot=True,
@@ -341,13 +341,19 @@ def heatmap(input_file):
         xticklabels=subject_names,
         yticklabels=[i+1 for i in range(len(marks_matrix))]
     )
-
+    
+    
     heatmap_path = os.path.join(data_dir, "heatmap.png")
+
+    plt.xticks(rotation=45, ha='right')
+    plt.yticks(rotation=0)
     plt.tight_layout()
+
     plt.savefig(heatmap_path)
     plt.close()
 #-----------------HeatMap report--------------
 def heatmap_report(input_file):
+    
 
     marks_matrix = []
 
@@ -359,7 +365,7 @@ def heatmap_report(input_file):
 
     subject_wise = list(zip(*marks_matrix))
 
-    plt.figure(figsize=(8,6))
+    plt.figure(figsize=(10,6))
     sns.heatmap(
         marks_matrix,
         annot=True,
@@ -370,6 +376,9 @@ def heatmap_report(input_file):
     )
 
     heatmap_path = os.path.join(data_dir, "heatmap.png")
+    plt.xticks(rotation=45, ha='right')
+    plt.yticks(rotation=0)
+    plt.tight_layout()
     plt.savefig(heatmap_path)
     plt.close()
 

@@ -11,7 +11,7 @@ The **Student Marks Analyser** is a comprehensive academic evaluation system tha
 - Accepts structured student marks input
 - Validates data integrity
 - Computes grades and rankings
-- Generates detailed PDF report cards
+- Generates detailed and professionally formatted PDF report cards
 - Performs subject-wise statistical analysis
 - Produces graphical performance insights
 - Identifies academic competition gaps
@@ -53,7 +53,7 @@ The system automatically identifies:
 - Most balanced subject
 - Subject competition gap
 - Class average vs topper disparity
-- Performance distribution trends
+- Overall Performance distribution trends
 - Grade distribution spread
 
 This makes the system useful for:
@@ -69,11 +69,9 @@ This makes the system useful for:
 
 - **Python**
 - `os`
-- `pandas`
 - `matplotlib`
 - `seaborn`
-- `reportlab`
-
+- `fpdf`
 
 ---
 
@@ -90,13 +88,23 @@ STUDENT_MARKS_ANALYSER/
 │   ├── grade_distribution.png
 │   ├── heatmap.png
 │   ├── topper_vs_average.png
-│   ├── report_card_average.png
-│   ├── report_card_topper.png
-│   └── report_card_fail.png
+│   └── report_card_average.png
+│
+├── SAMPLE_DATA/     
 ├── requirements.txt
 ├── README.md
 └── .gitignore
 ```
+## 📁 Sample Data
+
+A sample input file and generated output files are available in the `SAMPLE_DATA/` folder.
+
+This allows users to understand:
+
+- Expected input format  
+- Structure of generated results  
+- Example of professional report card output  
+
 ## 🖼 Sample Outputs
 
 ### 📈 Grade Distribution

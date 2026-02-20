@@ -1,0 +1,34 @@
+'''Do not paste this -
+   Enter no. of Subjects - 5
+   Enter 5 names - then paste this data'''
+1001,Aarav Sharma,92,88,90,76,95
+1002,Ananya Patel,78,74,69,82,80
+1003,Rohan Singh,85,91,87,72,89
+1004,Priya Gupta,66,61,64,75,70
+1005,Vikram Mehta,95,93,94,81,97
+1006,Aisha Khan,72,68,70,85,78
+1007,Karan Verma,58,55,60,67,62
+1008,Neha Reddy,81,79,76,88,84
+1009,Arjun Nair,49,52,47,65,54
+1010,Meera Iyer,88,86,84,90,91
+1011,Dev Malhotra,91,89,92,73,94
+1012,Sanya Desai,74,71,69,80,77
+1013,Raj Patel,63,59,61,68,65
+1014,Ishita Joshi,84,82,80,92,86
+1015,Yash Thakur,55,48,52,60,58
+1016,Tanvi Shah,89,87,85,93,90
+1017,Aditya Kulkarni,77,73,75,70,79
+1018,Simran Kaur,69,66,72,83,74
+1019,Harsh Vora,34,40,38,50,42
+1020,Pooja Menon,82,78,81,87,85
+1021,Ritvik Sinha,93,95,91,79,96
+1022,Kavya Nambiar,71,69,73,84,76
+1023,Manav Bansal,60,58,55,66,63
+1024,Diya Choudhary,86,83,88,91,89
+1025,Omkar Rao,47,44,50,62,53
+1026,Rhea Kapoor,79,76,78,85,81
+1027,Siddharth Jain,90,92,89,75,93
+1028,Anushka Pillai,68,64,67,80,72
+1029,Krish Agarwal,52,49,54,59,57
+1030,Nidhi Arora,83,85,82,88,86
+END
